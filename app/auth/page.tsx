@@ -30,7 +30,7 @@ export default function AuthPage() {
     const endpoint = type === "login" ? "/auth/login" : "/auth/signup"
 
     try {
-      const response = await fetch(`http://ec2-51-20-54-25.eu-north-1.compute.amazonaws.com:8000${endpoint}`, {
+      const response = await fetch(`https://vibesense230.zapto.org/${endpoint}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
@@ -49,7 +49,11 @@ export default function AuthPage() {
         setActiveTab("login")
       }
     } catch (error) {
-      setErrorMessage(error.message)
+      if (error instanceof Error) {
+        setErrorMessage(error.message)
+      } else {
+        setErrorMessage("An unknown error occurred")
+      }
     }
   }
 
@@ -107,7 +111,13 @@ export default function AuthPage() {
   )
 }
 
-function AuthForm({ showPassword, togglePasswordVisibility, isRegister = false }) {
+interface AuthFormProps {
+  showPassword: boolean;
+  togglePasswordVisibility: () => void;
+  isRegister?: boolean;
+}
+
+function AuthForm({ showPassword, togglePasswordVisibility, isRegister = false }: AuthFormProps) {
   return (
     <div className="space-y-5">
       {isRegister && (

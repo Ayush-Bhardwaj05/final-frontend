@@ -27,7 +27,7 @@ const models: Model[] = [
     name: "VibeSense Indian",
     image: "/placeholder.svg?height=400&width=400",
     description: "Model trained on Indian Accent to predict emotions and voice augmentation.",
-    url: "http://ec2-51-20-54-25.eu-north-1.compute.amazonaws.com:8000/predict-indian",
+    url: "https://vibesense230.zapto.org/predict-indian",
     specs: {
       accuracy: "93.7%",
       training: "3000",
@@ -40,7 +40,7 @@ const models: Model[] = [
     name: "VibeSense Foreign",
     image: "/placeholder.svg?height=400&width=400",
     description: "Model trained on CREMA-D, RAVDESS, SAVEE and TESS COMBINED.",
-    url: "http://ec2-51-20-54-25.eu-north-1.compute.amazonaws.com:8000/predict-emotion",
+    url: "https://vibesense230.zapto.org/predict-emotion",
     specs: {
       accuracy: "96%",
       training: "33000",
@@ -53,7 +53,7 @@ const models: Model[] = [
     name: "VibeSense Echo",
     image: "/placeholder.svg?height=400&width=400",
     description: "Gemini Model.",
-    url: "http://ec2-51-20-54-25.eu-north-1.compute.amazonaws.com:8000/predict-echo",
+    url: "https://vibesense230.zapto.org//predict-echo",
     specs: {
       training: "Pre-Trained",
       languages: "36 languages supported",
