@@ -1,24 +1,25 @@
-"use client"
+"use client";
 
-import { useState, useRef } from "react"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent } from "@/components/ui/card"
-import { motion, AnimatePresence } from "framer-motion"
-import { X, Sparkles, Mic, MicOff } from "lucide-react"
+import { useState, useRef } from "react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { motion, AnimatePresence } from "framer-motion";
+import { X, Sparkles, Mic, MicOff, ArrowRight } from "lucide-react";
+import Link from "next/link";
 
 interface Model {
-  id: number
-  name: string
-  image: string
-  description: string
-  url: string
+  id: number;
+  name: string;
+  image: string;
+  description: string;
+  url: string;
   specs: {
-    accuracy?: string
-    training: string
-    response?: string
-    languages?: string
-    specialization: string
-  }
+    accuracy?: string;
+    training: string;
+    response?: string;
+    languages?: string;
+    specialization: string;
+  };
 }
 
 const models: Model[] = [
@@ -26,7 +27,8 @@ const models: Model[] = [
     id: 1,
     name: "VibeSense Indian",
     image: "/placeholder.svg?height=400&width=400",
-    description: "Model trained on Indian Accent to predict emotions and voice augmentation.",
+    description:
+      "Model trained on Indian Accent to predict emotions and voice augmentation.",
     url: "https://vibesense230.zapto.org/predict-indian",
     specs: {
       accuracy: "93.7%",
@@ -39,7 +41,8 @@ const models: Model[] = [
     id: 2,
     name: "VibeSense Foreign",
     image: "/placeholder.svg?height=400&width=400",
-    description: "Model trained on CREMA-D, RAVDESS, SAVEE and TESS COMBINED.",
+    description:
+      "Model trained on CREMA-D, RAVDESS, SAVEE and TESS COMBINED. NOTE: Low Accuracy for Indian Accent.",
     url: "https://vibesense230.zapto.org/predict-emotion",
     specs: {
       accuracy: "96%",
@@ -60,165 +63,179 @@ const models: Model[] = [
       specialization: "Pre trained model",
     },
   },
-]
+];
 
 // Helper function to convert AudioBuffer to WAV format
 const audioBufferToWav = (buffer: AudioBuffer): ArrayBuffer => {
-  const numChannels = buffer.numberOfChannels
-  const sampleRate = buffer.sampleRate
-  const bytesPerSample = 2 // 16-bit
-  const blockAlign = numChannels * bytesPerSample
+  const numChannels = buffer.numberOfChannels;
+  const sampleRate = buffer.sampleRate;
+  const bytesPerSample = 2; // 16-bit
+  const blockAlign = numChannels * bytesPerSample;
 
   // Calculate data chunk size
-  const dataChunkSize = buffer.length * numChannels * bytesPerSample
+  const dataChunkSize = buffer.length * numChannels * bytesPerSample;
 
   // Create buffer for WAV header (44 bytes) + data
-  const arrayBuffer = new ArrayBuffer(44 + dataChunkSize)
-  const view = new DataView(arrayBuffer)
+  const arrayBuffer = new ArrayBuffer(44 + dataChunkSize);
+  const view = new DataView(arrayBuffer);
 
   // RIFF header
-  writeString(view, 0, "RIFF")
-  view.setUint32(4, 36 + dataChunkSize, true) // file length
-  writeString(view, 8, "WAVE")
-  writeString(view, 12, "fmt ")
-  view.setUint32(16, 16, true) // fmt chunk length
-  view.setUint16(20, 1, true) // PCM format
-  view.setUint16(22, numChannels, true)
-  view.setUint32(24, sampleRate, true)
-  view.setUint32(28, sampleRate * blockAlign, true) // byte rate
-  view.setUint16(32, blockAlign, true)
-  view.setUint16(34, bytesPerSample * 8, true) // bits per sample
-  writeString(view, 36, "data")
-  view.setUint32(40, dataChunkSize, true)
+  writeString(view, 0, "RIFF");
+  view.setUint32(4, 36 + dataChunkSize, true); // file length
+  writeString(view, 8, "WAVE");
+  writeString(view, 12, "fmt ");
+  view.setUint32(16, 16, true); // fmt chunk length
+  view.setUint16(20, 1, true); // PCM format
+  view.setUint16(22, numChannels, true);
+  view.setUint32(24, sampleRate, true);
+  view.setUint32(28, sampleRate * blockAlign, true); // byte rate
+  view.setUint16(32, blockAlign, true);
+  view.setUint16(34, bytesPerSample * 8, true); // bits per sample
+  writeString(view, 36, "data");
+  view.setUint32(40, dataChunkSize, true);
 
   // Write PCM samples
-  let offset = 44
+  let offset = 44;
   for (let i = 0; i < buffer.length; i++) {
     for (let channel = 0; channel < numChannels; channel++) {
-      const sample = Math.max(-1, Math.min(1, buffer.getChannelData(channel)[i]))
-      view.setInt16(offset, sample < 0 ? sample * 0x8000 : sample * 0x7fff, true)
-      offset += 2
+      const sample = Math.max(
+        -1,
+        Math.min(1, buffer.getChannelData(channel)[i])
+      );
+      view.setInt16(
+        offset,
+        sample < 0 ? sample * 0x8000 : sample * 0x7fff,
+        true
+      );
+      offset += 2;
     }
   }
 
-  return arrayBuffer
-}
+  return arrayBuffer;
+};
 
 const writeString = (view: DataView, offset: number, str: string) => {
   for (let i = 0; i < str.length; i++) {
-    view.setUint8(offset + i, str.charCodeAt(i))
+    view.setUint8(offset + i, str.charCodeAt(i));
   }
-}
+};
 
 // Convert any audio blob to WAV format
 const convertToWav = async (blob: Blob): Promise<Blob> => {
   try {
-    const arrayBuffer = await blob.arrayBuffer()
-    const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)()
-    const audioBuffer = await audioContext.decodeAudioData(arrayBuffer)
-    const wavArrayBuffer = audioBufferToWav(audioBuffer)
-    return new Blob([wavArrayBuffer], { type: "audio/wav" })
+    const arrayBuffer = await blob.arrayBuffer();
+    const audioContext = new (window.AudioContext ||
+      (window as any).webkitAudioContext)();
+    const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
+    const wavArrayBuffer = audioBufferToWav(audioBuffer);
+    return new Blob([wavArrayBuffer], { type: "audio/wav" });
   } catch (error) {
-    console.error("Error converting to WAV:", error)
-    throw error
+    console.error("Error converting to WAV:", error);
+    throw error;
   }
-}
+};
 
 export default function ModelsPage() {
-  const [isRecording, setIsRecording] = useState(false)
-  const mediaRecorder = useRef<MediaRecorder | null>(null)
-  const audioChunks = useRef<Blob[]>([])
-  const [activeModel, setActiveModel] = useState<Model | null>(null)
-  const [selectedModel, setSelectedModel] = useState<Model | null>(null)
-  const [isLoading, setIsLoading] = useState(false)
-  const [emotionResult, setEmotionResult] = useState<string | null>(null)
+  const [isRecording, setIsRecording] = useState(false);
+  const mediaRecorder = useRef<MediaRecorder | null>(null);
+  const audioChunks = useRef<Blob[]>([]);
+  const [activeModel, setActiveModel] = useState<Model | null>(null);
+  const [selectedModel, setSelectedModel] = useState<Model | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [emotionResult, setEmotionResult] = useState<string | null>(null);
 
   const startRecording = async (model: Model) => {
     try {
-      setEmotionResult(null) // Reset emotion result
-      console.log("Starting recording for model:", model.name)
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
-      setActiveModel(model)
+      setEmotionResult(null); // Reset emotion result
+      console.log("Starting recording for model:", model.name);
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      setActiveModel(model);
 
       // Use webm by default as most browsers don't support WAV recording
-      const options = { mimeType: "audio/webm;codecs=opus" }
-      const recorder = new MediaRecorder(stream, options)
-      console.log("MediaRecorder mimeType:", recorder.mimeType)
+      const options = { mimeType: "audio/webm;codecs=opus" };
+      const recorder = new MediaRecorder(stream, options);
+      console.log("MediaRecorder mimeType:", recorder.mimeType);
 
       recorder.onstart = () => {
-        console.log("MediaRecorder started")
-        audioChunks.current = []
-      }
+        console.log("MediaRecorder started");
+        audioChunks.current = [];
+      };
 
       recorder.ondataavailable = (event) => {
         if (event.data.size > 0) {
-          audioChunks.current.push(event.data)
-          console.log("Chunk added. Total chunks:", audioChunks.current.length)
+          audioChunks.current.push(event.data);
+          console.log("Chunk added. Total chunks:", audioChunks.current.length);
         }
-      }
+      };
 
       recorder.onstop = async () => {
-        console.log("Recording stopped")
+        console.log("Recording stopped");
         try {
-          setIsLoading(true)
-          const audioBlob = new Blob(audioChunks.current, { type: recorder.mimeType })
-          console.log("Original audio blob:", audioBlob)
+          setIsLoading(true);
+          const audioBlob = new Blob(audioChunks.current, {
+            type: recorder.mimeType,
+          });
+          console.log("Original audio blob:", audioBlob);
 
           // Convert to WAV before uploading
-          const wavBlob = await convertToWav(audioBlob)
-          console.log("Converted WAV blob:", wavBlob)
+          const wavBlob = await convertToWav(audioBlob);
+          console.log("Converted WAV blob:", wavBlob);
 
-          const formData = new FormData()
-          formData.append("file", wavBlob, "recording.wav")
+          const formData = new FormData();
+          formData.append("file", wavBlob, "recording.wav");
 
-          console.log("Uploading file to:", model.url)
+          console.log("Uploading file to:", model.url);
           const response = await fetch(model.url, {
             method: "POST",
             body: formData,
-          })
+          });
 
           if (!response.ok) {
-            console.error("Server error:", response.status, response.statusText)
-            throw new Error(`Server error: ${response.statusText}`)
+            console.error(
+              "Server error:",
+              response.status,
+              response.statusText
+            );
+            throw new Error(`Server error: ${response.statusText}`);
           }
 
-          const data = await response.json()
-          console.log("Upload successful. Response:", data)
-          setEmotionResult(data.emotion)
+          const data = await response.json();
+          console.log("Upload successful. Response:", data);
+          setEmotionResult(data.emotion);
         } catch (error) {
-          console.error("Upload error:", error)
-          setEmotionResult(null)
+          console.error("Upload error:", error);
+          setEmotionResult(null);
         } finally {
-          setIsLoading(false)
-          audioChunks.current = []
-          stream.getTracks().forEach((track) => track.stop())
+          setIsLoading(false);
+          audioChunks.current = [];
+          stream.getTracks().forEach((track) => track.stop());
         }
-      }
+      };
 
-      mediaRecorder.current = recorder
-      recorder.start(100) // Collect data every 100ms
-      setIsRecording(true)
-      console.log("Recording started")
+      mediaRecorder.current = recorder;
+      recorder.start(100); // Collect data every 100ms
+      setIsRecording(true);
+      console.log("Recording started");
     } catch (error) {
-      console.error("Error starting recording:", error)
+      console.error("Error starting recording:", error);
     }
-  }
+  };
 
   const stopRecording = () => {
     if (mediaRecorder.current && isRecording) {
-      mediaRecorder.current.stop()
-      setIsRecording(false)
-      console.log("Stopping recording")
+      mediaRecorder.current.stop();
+      setIsRecording(false);
+      console.log("Stopping recording");
     }
-  }
+  };
 
   const handleTryModel = (model: Model) => {
     if (isRecording && activeModel?.id === model.id) {
-      stopRecording()
+      stopRecording();
     } else {
-      startRecording(model)
+      startRecording(model);
     }
-  }
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-black via-[#13071E] to-[#1E0B33] py-24">
@@ -242,24 +259,20 @@ export default function ModelsPage() {
             </div>
           </div>
           <p className="mb-8 text-xl text-slate-300">
-            Our flagship VibeSense AI model delivers unparalleled accuracy and natural language understanding. Try it
-            now and experience the future of AI interaction.
+            Our flagship VibeSense AI model delivers unparalleled accuracy and
+            natural language understanding. Try it now and experience the future
+            of AI interaction.
           </p>
-          <Button
-            onClick={() => handleTryModel(models[0])}
-            className="bg-gradient-to-r from-purple-600 to-violet-600 text-white hover:from-purple-700 hover:to-violet-700 shadow-[0_0_20px_rgba(147,51,234,0.5)] transition-all duration-300 flex items-center gap-2"
-            size="lg"
-          >
-            {isRecording && activeModel?.id === models[0].id ? (
-              <>
-                <MicOff className="h-5 w-5 animate-pulse text-red-400" /> Stop Recording
-              </>
-            ) : (
-              <>
-                <Mic className="h-5 w-5" /> Start Recording
-              </>
-            )}
-          </Button>
+          <div className="flex justify-center">
+            <Link href="/explore">
+              <Button
+                className="bg-gradient-to-r from-purple-600 to-violet-600 text-white hover:from-purple-700 hover:to-violet-700 shadow-[0_0_20px_rgba(147,51,234,0.5)] transition-all duration-300 flex items-center gap-2"
+                size="lg"
+              >
+                Try Out Our Best Model <Sparkles className="h-4 w-4" />
+              </Button>
+            </Link>
+          </div>
         </motion.div>
       </div>
 
@@ -272,13 +285,46 @@ export default function ModelsPage() {
         >
           <h1 className="mb-6 text-5xl font-bold text-white md:text-6xl">
             Our{" "}
-            <span className="bg-gradient-to-r from-purple-400 to-violet-500 bg-clip-text text-transparent">Models</span>
+            <span className="bg-gradient-to-r from-purple-400 to-violet-500 bg-clip-text text-transparent">
+              Models
+            </span>
           </h1>
           <p className="mx-auto max-w-2xl text-xl text-slate-300">
-            Explore our range of advanced AI models designed for various applications and environments.
+            Explore our range of advanced AI models designed for various
+            applications and environments.
           </p>
         </motion.div>
+        <Card className="overflow-hidden border border-purple-500/30 bg-black/40 backdrop-blur-sm shadow-[0_0_30px_rgba(147,51,234,0.3)]">
+          <CardContent className="p-0">
+            <div className="relative p-8">
+              <div className="absolute -right-20 -top-20 h-64 w-64 rounded-full bg-purple-600/20 blur-3xl"></div>
+              <div className="absolute -left-20 -bottom-20 h-64 w-64 rounded-full bg-violet-600/20 blur-3xl"></div>
 
+              <h3 className="relative mb-6 text-center text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-400">
+                Try Out These Samples
+              </h3>
+
+              <div className="grid gap-6 md:grid-cols-2">
+  {[
+    { emotion: "Happy", text1: "I am so happy today!", text2: "This is the best day ever." },
+    { emotion: "Sad", text1: "I feel really down today.", text2: "I miss my old friends a lot." },
+    { emotion: "Angry", text1: "I can’t believe this is happening!", text2: "This is so frustrating, yaar!" },
+    { emotion: "Neutral", text1: "I went to the shop to buy some milk.", text2: "Today was a normal day." },
+  ].map(({ emotion, text1, text2 }) => (
+    <div
+      key={emotion}
+      className="rounded-xl border border-purple-500/20 bg-black/50 p-4 backdrop-blur-md transition-all hover:border-purple-500/40 hover:shadow-[0_0_15px_rgba(147,51,234,0.2)]"
+    >
+      <h4 className="mb-3 font-semibold text-purple-400">{emotion}</h4>
+      <p className="text-slate-300">1. {text1}</p>
+      <p className="text-slate-300">2. {text2}</p>
+    </div>
+  ))}
+</div>
+
+            </div>
+          </CardContent>
+        </Card>
         <motion.div
           className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3"
           initial={{ opacity: 0 }}
@@ -304,11 +350,15 @@ export default function ModelsPage() {
                   <div className="absolute inset-0 bg-gradient-to-t from-[#13071E] to-transparent opacity-70"></div>
                 </div>
                 <CardContent className="relative z-10 p-6">
-                  <h3 className="mb-2 text-2xl font-bold text-white">{model.name}</h3>
+                  <h3 className="mb-2 text-2xl font-bold text-white">
+                    {model.name}
+                  </h3>
                   <p className="mb-4 text-slate-300">{model.description}</p>
                   <div className="mb-4 flex items-center justify-between">
                     <span className="text-sm text-slate-400">Accuracy</span>
-                    <span className="text-sm font-medium text-purple-400">{model.specs.accuracy || "N/A"}</span>
+                    <span className="text-sm font-medium text-purple-400">
+                      {model.specs.accuracy || "N/A"}
+                    </span>
                   </div>
                   <div className="flex gap-2">
                     <Button
@@ -419,18 +469,25 @@ export default function ModelsPage() {
                     transition={{ duration: 0.5, delay: 0.3 }}
                     className="mb-6 space-y-3"
                   >
-                    {Object.entries(selectedModel.specs).map(([key, value], index) => (
-                      <motion.div
-                        key={key}
-                        initial={{ opacity: 0, x: -10 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ duration: 0.3, delay: 0.3 + index * 0.1 }}
-                        className="flex justify-between border-b border-purple-500/20 pb-2"
-                      >
-                        <span className="font-medium capitalize text-purple-300">{key}</span>
-                        <span className="text-slate-300">{value}</span>
-                      </motion.div>
-                    ))}
+                    {Object.entries(selectedModel.specs).map(
+                      ([key, value], index) => (
+                        <motion.div
+                          key={key}
+                          initial={{ opacity: 0, x: -10 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          transition={{
+                            duration: 0.3,
+                            delay: 0.3 + index * 0.1,
+                          }}
+                          className="flex justify-between border-b border-purple-500/20 pb-2"
+                        >
+                          <span className="font-medium capitalize text-purple-300">
+                            {key}
+                          </span>
+                          <span className="text-slate-300">{value}</span>
+                        </motion.div>
+                      )
+                    )}
                   </motion.div>
 
                   <motion.div
@@ -449,7 +506,8 @@ export default function ModelsPage() {
                     >
                       {isRecording && activeModel?.id === selectedModel.id ? (
                         <>
-                          <MicOff className="h-5 w-5 animate-pulse text-red-200" /> Stop Recording
+                          <MicOff className="h-5 w-5 animate-pulse text-red-200" />{" "}
+                          Stop Recording
                         </>
                       ) : (
                         <>
@@ -488,7 +546,10 @@ export default function ModelsPage() {
                     <div className="absolute inset-0 flex items-center justify-center">
                       <div
                         className="h-16 w-16 rounded-full border-4 border-transparent border-t-violet-500 animate-spin"
-                        style={{ animationDirection: "reverse", animationDuration: "1.5s" }}
+                        style={{
+                          animationDirection: "reverse",
+                          animationDuration: "1.5s",
+                        }}
                       ></div>
                     </div>
                     <div className="absolute inset-0 flex items-center justify-center">
@@ -501,7 +562,10 @@ export default function ModelsPage() {
                   <motion.p
                     className="text-xl font-medium text-purple-300"
                     animate={{ opacity: [0.5, 1, 0.5] }}
-                    transition={{ repeat: Number.POSITIVE_INFINITY, duration: 2 }}
+                    transition={{
+                      repeat: Number.POSITIVE_INFINITY,
+                      duration: 2,
+                    }}
                   >
                     Analyzing voice patterns...
                   </motion.p>
@@ -512,7 +576,11 @@ export default function ModelsPage() {
                     <motion.div
                       initial={{ scale: 0, rotate: -180 }}
                       animate={{ scale: 1, rotate: 0 }}
-                      transition={{ type: "spring", damping: 10, stiffness: 100 }}
+                      transition={{
+                        type: "spring",
+                        damping: 10,
+                        stiffness: 100,
+                      }}
                       className="mb-8 flex h-40 w-40 items-center justify-center rounded-full bg-gradient-to-br from-purple-600 via-violet-600 to-pink-600 p-1 shadow-[0_0_30px_rgba(147,51,234,0.6)]"
                     >
                       <div className="flex h-full w-full items-center justify-center rounded-full bg-black/80 text-center">
@@ -551,5 +619,5 @@ export default function ModelsPage() {
         )}
       </AnimatePresence>
     </div>
-  )
+  );
 }

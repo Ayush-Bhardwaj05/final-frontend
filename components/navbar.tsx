@@ -9,9 +9,10 @@ import { Button } from "@/components/ui/button"
 
 const navItems = [
   { name: "Home", path: "/" },
+  { name: "Explore", path: "/explore" },
   { name: "Our Models", path: "/models" },
   { name: "About Us", path: "/about" },
-  { name: "Explore", path: "/explore" },
+  
 ]
 
 export default function Navbar() {
