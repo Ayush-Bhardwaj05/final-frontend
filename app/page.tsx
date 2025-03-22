@@ -31,7 +31,7 @@ export default function Home() {
         >
           <LoadingSpline
             src="https://my.spline.design/nexbotrobotcharacterconcept-5e50b3339fddca3d56a0a0e7943ef3c0/"
-            title="VibeSense AI"
+            title="Loading Echo..."
           />
         </motion.div>
 
@@ -44,9 +44,9 @@ export default function Home() {
         >
           <div className="relative inline-block mb-4">
             <h1 className="text-4xl font-bold leading-tight text-white md:text-6xl lg:text-7xl">
-              Meet Vibe
+              Meet                       
               <span className="ml-2 bg-gradient-to-r from-purple-400 to-violet-500 bg-clip-text text-transparent">
-                Sense
+                Echo
               </span>
             </h1>
             <div className="absolute -right-6 -top-6 text-purple-400 animate-pulse">

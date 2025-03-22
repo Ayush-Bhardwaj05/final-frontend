@@ -71,7 +71,7 @@ export default function Navbar() {
               transition={{ duration: 0.5 }}
             >
               <span className="text-2xl font-bold text-white">
-                Vibe<span className="text-purple-400">Sense</span>
+              <span className="text-purple-400">Echo</span>
               </span>
             </motion.div>
           </Link>

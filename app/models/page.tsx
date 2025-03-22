@@ -4,7 +4,7 @@ import { useState, useRef } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { motion, AnimatePresence } from "framer-motion"
-import { X, Sparkles, ArrowRight } from "lucide-react"
+import { X, Sparkles, Mic, MicOff } from "lucide-react"
 
 interface Model {
   id: number
@@ -12,44 +12,50 @@ interface Model {
   image: string
   description: string
   url: string
+  specs: {
+    accuracy?: string
+    training: string
+    response?: string
+    languages?: string
+    specialization: string
+  }
 }
 
-const models = [
+const models: Model[] = [
   {
     id: 1,
-    name: "VibeSense Indian",
+    name: "Echo India",
     image: "/placeholder.svg?height=400&width=400",
     description: "Model trained on Indian Accent to predict emotions and voice augmentation.",
+    url: "http://127.0.0.1:8000/predict-indian",
     specs: {
       accuracy: "93.7%",
       training: "3000",
       response: "Under 10ms",
-      // languages: "42 languages supported",
       specialization: "Natural conversation, creative content, Indian Accent",
     },
   },
   {
     id: 2,
-    name: "VibeSense Foreign",
+    name: "Echo Global",
     image: "/placeholder.svg?height=400&width=400",
     description: "Model trained on CREMA-D, RAVDESS, SAVEE and TESS COMBINED.",
+    url: "http://127.0.0.1:8000/predict-emotion",
     specs: {
       accuracy: "96%",
       training: "33000",
       response: "Under 7ms",
-      // languages: "28 languages supported",
       specialization: "Foreign accent, emotional analysis, voice modulation",
     },
   },
   {
     id: 3,
-    name: "VibeSense Echo",
+    name: "Echo",
     image: "/placeholder.svg?height=400&width=400",
     description: "Gemini Model.",
+    url: "http://127.0.0.1:8000/predict-echo",
     specs: {
-      // accuracy: "9%",
       training: "Pre-Trained",
-      // response: "Under 75ms",
       languages: "36 languages supported",
       specialization: "Pre trained model",
     },
@@ -71,10 +77,10 @@ const audioBufferToWav = (buffer: AudioBuffer): ArrayBuffer => {
   const view = new DataView(arrayBuffer)
 
   // RIFF header
-  writeString(view, 0, 'RIFF')
+  writeString(view, 0, "RIFF")
   view.setUint32(4, 36 + dataChunkSize, true) // file length
-  writeString(view, 8, 'WAVE')
-  writeString(view, 12, 'fmt ')
+  writeString(view, 8, "WAVE")
+  writeString(view, 12, "fmt ")
   view.setUint32(16, 16, true) // fmt chunk length
   view.setUint16(20, 1, true) // PCM format
   view.setUint16(22, numChannels, true)
@@ -82,7 +88,7 @@ const audioBufferToWav = (buffer: AudioBuffer): ArrayBuffer => {
   view.setUint32(28, sampleRate * blockAlign, true) // byte rate
   view.setUint16(32, blockAlign, true)
   view.setUint16(34, bytesPerSample * 8, true) // bits per sample
-  writeString(view, 36, 'data')
+  writeString(view, 36, "data")
   view.setUint32(40, dataChunkSize, true)
 
   // Write PCM samples
@@ -90,7 +96,7 @@ const audioBufferToWav = (buffer: AudioBuffer): ArrayBuffer => {
   for (let i = 0; i < buffer.length; i++) {
     for (let channel = 0; channel < numChannels; channel++) {
       const sample = Math.max(-1, Math.min(1, buffer.getChannelData(channel)[i]))
-      view.setInt16(offset, sample < 0 ? sample * 0x8000 : sample * 0x7FFF, true)
+      view.setInt16(offset, sample < 0 ? sample * 0x8000 : sample * 0x7fff, true)
       offset += 2
     }
   }
@@ -111,7 +117,7 @@ const convertToWav = async (blob: Blob): Promise<Blob> => {
     const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)()
     const audioBuffer = await audioContext.decodeAudioData(arrayBuffer)
     const wavArrayBuffer = audioBufferToWav(audioBuffer)
-    return new Blob([wavArrayBuffer], { type: 'audio/wav' })
+    return new Blob([wavArrayBuffer], { type: "audio/wav" })
   } catch (error) {
     console.error("Error converting to WAV:", error)
     throw error
@@ -123,16 +129,8 @@ export default function ModelsPage() {
   const mediaRecorder = useRef<MediaRecorder | null>(null)
   const audioChunks = useRef<Blob[]>([])
   const [activeModel, setActiveModel] = useState<Model | null>(null)
-  const [selectedModel, setSelectedModel] = useState<(typeof models)[0] | null>(null)
-  const [isLoggedIn, setIsLoggedIn] = useState(false)
+  const [selectedModel, setSelectedModel] = useState<Model | null>(null)
 
-  const handleTryModel = () => {
-    if (isLoggedIn) {
-      window.location.href = "/explore"
-    } else {
-      window.location.href = "/auth"
-    }
-  }
   const startRecording = async (model: Model) => {
     try {
       console.log("Starting recording for model:", model.name)
@@ -140,7 +138,7 @@ export default function ModelsPage() {
       setActiveModel(model)
 
       // Use webm by default as most browsers don't support WAV recording
-      const options = { mimeType: 'audio/webm;codecs=opus' }
+      const options = { mimeType: "audio/webm;codecs=opus" }
       const recorder = new MediaRecorder(stream, options)
       console.log("MediaRecorder mimeType:", recorder.mimeType)
 
@@ -186,7 +184,7 @@ export default function ModelsPage() {
           console.error("Upload error:", error)
         } finally {
           audioChunks.current = []
-          stream.getTracks().forEach(track => track.stop())
+          stream.getTracks().forEach((track) => track.stop())
         }
       }
 
@@ -204,6 +202,14 @@ export default function ModelsPage() {
       mediaRecorder.current.stop()
       setIsRecording(false)
       console.log("Stopping recording")
+    }
+  }
+
+  const handleTryModel = (model: Model) => {
+    if (isRecording && activeModel?.id === model.id) {
+      stopRecording()
+    } else {
+      startRecording(model)
     }
   }
 
@@ -233,11 +239,19 @@ export default function ModelsPage() {
             now and experience the future of AI interaction.
           </p>
           <Button
-            onClick={handleTryModel}
-            className="bg-gradient-to-r from-purple-600 to-violet-600 text-white hover:from-purple-700 hover:to-violet-700 shadow-[0_0_20px_rgba(147,51,234,0.5)] transition-all duration-300"
+            onClick={() => handleTryModel(models[0])}
+            className="bg-gradient-to-r from-purple-600 to-violet-600 text-white hover:from-purple-700 hover:to-violet-700 shadow-[0_0_20px_rgba(147,51,234,0.5)] transition-all duration-300 flex items-center gap-2"
             size="lg"
           >
-            Try It Out <ArrowRight className="ml-2 h-4 w-4" />
+            {isRecording && activeModel?.id === models[0].id ? (
+              <>
+                <MicOff className="h-5 w-5 animate-pulse text-red-400" /> Stop Recording
+              </>
+            ) : (
+              <>
+                <Mic className="h-5 w-5" /> Start Recording
+              </>
+            )}
           </Button>
         </motion.div>
       </div>
@@ -272,10 +286,7 @@ export default function ModelsPage() {
               transition={{ duration: 0.5, delay: index * 0.1 }}
               whileHover={{ y: -10, transition: { duration: 0.2 } }}
             >
-              <Card
-                className="group relative overflow-hidden border border-purple-500/20 bg-black/40 backdrop-blur-sm transition-all hover:border-purple-500 hover:shadow-[0_0_20px_rgba(147,51,234,0.3)]"
-                onClick={() => setSelectedModel(model)}
-              >
+              <Card className="group relative overflow-hidden border border-purple-500/20 bg-black/40 backdrop-blur-sm transition-all hover:border-purple-500 hover:shadow-[0_0_20px_rgba(147,51,234,0.3)]">
                 <div className="aspect-square w-full overflow-hidden bg-black/60 p-6">
                   <motion.img
                     src={model.image}
@@ -290,14 +301,34 @@ export default function ModelsPage() {
                   <p className="mb-4 text-slate-300">{model.description}</p>
                   <div className="mb-4 flex items-center justify-between">
                     <span className="text-sm text-slate-400">Accuracy</span>
-                    <span className="text-sm font-medium text-purple-400">{model.specs.accuracy}</span>
+                    <span className="text-sm font-medium text-purple-400">{model.specs.accuracy || "N/A"}</span>
                   </div>
-                  <Button
-                    className="w-full bg-gradient-to-r from-purple-600 to-violet-600 text-white hover:from-purple-700 hover:to-violet-700 shadow-[0_0_15px_rgba(147,51,234,0.3)] transition-all duration-300"
-                    onClick={() => setSelectedModel(model)}
-                  >
-                    View Details
-                  </Button>
+                  <div className="flex gap-2">
+                    <Button
+                      className="flex-1 bg-gradient-to-r from-purple-600 to-violet-600 text-white hover:from-purple-700 hover:to-violet-700 shadow-[0_0_15px_rgba(147,51,234,0.3)] transition-all duration-300"
+                      onClick={() => setSelectedModel(model)}
+                    >
+                      View Details
+                    </Button>
+                    <Button
+                      className={`flex-1 ${
+                        isRecording && activeModel?.id === model.id
+                          ? "bg-red-600 hover:bg-red-700"
+                          : "bg-gradient-to-r from-purple-600 to-violet-600 hover:from-purple-700 hover:to-violet-700"
+                      } text-white shadow-[0_0_15px_rgba(147,51,234,0.3)] transition-all duration-300 flex items-center justify-center gap-1`}
+                      onClick={() => handleTryModel(model)}
+                    >
+                      {isRecording && activeModel?.id === model.id ? (
+                        <>
+                          <MicOff className="h-4 w-4" /> Stop
+                        </>
+                      ) : (
+                        <>
+                          <Mic className="h-4 w-4" /> Record
+                        </>
+                      )}
+                    </Button>
+                  </div>
                 </CardContent>
                 {/* Glow effect on hover */}
                 <div className="absolute inset-0 -z-10 opacity-0 transition-opacity group-hover:opacity-100">
@@ -402,10 +433,22 @@ export default function ModelsPage() {
                     className="mt-auto"
                   >
                     <Button
-                      className="w-full bg-gradient-to-r from-purple-600 to-violet-600 text-white hover:from-purple-700 hover:to-violet-700 shadow-[0_0_15px_rgba(147,51,234,0.3)] transition-all duration-300"
-                      onClick={handleTryModel}
+                      className={`w-full ${
+                        isRecording && activeModel?.id === selectedModel.id
+                          ? "bg-red-600 hover:bg-red-700"
+                          : "bg-gradient-to-r from-purple-600 to-violet-600 hover:from-purple-700 hover:to-violet-700"
+                      } text-white shadow-[0_0_15px_rgba(147,51,234,0.3)] transition-all duration-300 flex items-center justify-center gap-2`}
+                      onClick={() => handleTryModel(selectedModel)}
                     >
-                      Try It Out <ArrowRight className="ml-2 h-4 w-4" />
+                      {isRecording && activeModel?.id === selectedModel.id ? (
+                        <>
+                          <MicOff className="h-5 w-5 animate-pulse text-red-200" /> Stop Recording
+                        </>
+                      ) : (
+                        <>
+                          <Mic className="h-5 w-5" /> Start Recording
+                        </>
+                      )}
                     </Button>
                   </motion.div>
                 </div>
@@ -417,3 +460,4 @@ export default function ModelsPage() {
     </div>
   )
 }
+
