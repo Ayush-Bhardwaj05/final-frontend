@@ -53,7 +53,7 @@ const models: Model[] = [
     name: "VibeSense Echo",
     image: "/placeholder.svg?height=400&width=400",
     description: "Gemini Model.",
-    url: "https://vibesense230.zapto.org//predict-echo",
+    url: "https://vibesense230.zapto.org/predict-echo",
     specs: {
       training: "Pre-Trained",
       languages: "36 languages supported",
