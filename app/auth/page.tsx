@@ -30,7 +30,7 @@ export default function AuthPage() {
     const endpoint = type === "login" ? "/auth/login" : "/auth/signup"
 
     try {
-      const response = await fetch(`https://vibesense230.zapto.org/${endpoint}`, {
+      const response = await fetch(`https://vibesense230.zapto.org${endpoint}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
