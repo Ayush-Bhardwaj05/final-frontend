@@ -24,7 +24,7 @@ interface Model {
 const models: Model[] = [
   {
     id: 1,
-    name: "Echo India",
+    name: "VibeSense Indian",
     image: "/placeholder.svg?height=400&width=400",
     description: "Model trained on Indian Accent to predict emotions and voice augmentation.",
     url: "http://127.0.0.1:8000/predict-indian",
@@ -37,7 +37,7 @@ const models: Model[] = [
   },
   {
     id: 2,
-    name: "Echo Global",
+    name: "VibeSense Foreign",
     image: "/placeholder.svg?height=400&width=400",
     description: "Model trained on CREMA-D, RAVDESS, SAVEE and TESS COMBINED.",
     url: "http://127.0.0.1:8000/predict-emotion",
@@ -50,7 +50,7 @@ const models: Model[] = [
   },
   {
     id: 3,
-    name: "Echo",
+    name: "VibeSense Echo",
     image: "/placeholder.svg?height=400&width=400",
     description: "Gemini Model.",
     url: "http://127.0.0.1:8000/predict-echo",
@@ -130,9 +130,12 @@ export default function ModelsPage() {
   const audioChunks = useRef<Blob[]>([])
   const [activeModel, setActiveModel] = useState<Model | null>(null)
   const [selectedModel, setSelectedModel] = useState<Model | null>(null)
+  const [isLoading, setIsLoading] = useState(false)
+  const [emotionResult, setEmotionResult] = useState<string | null>(null)
 
   const startRecording = async (model: Model) => {
     try {
+      setEmotionResult(null) // Reset emotion result
       console.log("Starting recording for model:", model.name)
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
       setActiveModel(model)
@@ -157,6 +160,7 @@ export default function ModelsPage() {
       recorder.onstop = async () => {
         console.log("Recording stopped")
         try {
+          setIsLoading(true)
           const audioBlob = new Blob(audioChunks.current, { type: recorder.mimeType })
           console.log("Original audio blob:", audioBlob)
 
@@ -180,9 +184,12 @@ export default function ModelsPage() {
 
           const data = await response.json()
           console.log("Upload successful. Response:", data)
+          setEmotionResult(data.emotion)
         } catch (error) {
           console.error("Upload error:", error)
+          setEmotionResult(null)
         } finally {
+          setIsLoading(false)
           audioChunks.current = []
           stream.getTracks().forEach((track) => track.stop())
         }
@@ -457,7 +464,92 @@ export default function ModelsPage() {
           </motion.div>
         )}
       </AnimatePresence>
+      {/* Futuristic Loading and Result Overlay */}
+      <AnimatePresence>
+        {(isLoading || emotionResult) && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm"
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              className="relative flex flex-col items-center justify-center rounded-2xl border border-purple-500/30 bg-black/80 p-12 shadow-[0_0_50px_rgba(147,51,234,0.4)]"
+            >
+              {isLoading ? (
+                <div className="flex flex-col items-center">
+                  <div className="relative mb-8 h-32 w-32">
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <div className="h-24 w-24 rounded-full border-4 border-transparent border-t-purple-500 animate-spin"></div>
+                    </div>
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <div
+                        className="h-16 w-16 rounded-full border-4 border-transparent border-t-violet-500 animate-spin"
+                        style={{ animationDirection: "reverse", animationDuration: "1.5s" }}
+                      ></div>
+                    </div>
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <div
+                        className="h-8 w-8 rounded-full border-4 border-transparent border-t-pink-500 animate-spin"
+                        style={{ animationDuration: "0.75s" }}
+                      ></div>
+                    </div>
+                  </div>
+                  <motion.p
+                    className="text-xl font-medium text-purple-300"
+                    animate={{ opacity: [0.5, 1, 0.5] }}
+                    transition={{ repeat: Number.POSITIVE_INFINITY, duration: 2 }}
+                  >
+                    Analyzing voice patterns...
+                  </motion.p>
+                </div>
+              ) : (
+                emotionResult && (
+                  <div className="flex flex-col items-center">
+                    <motion.div
+                      initial={{ scale: 0, rotate: -180 }}
+                      animate={{ scale: 1, rotate: 0 }}
+                      transition={{ type: "spring", damping: 10, stiffness: 100 }}
+                      className="mb-8 flex h-40 w-40 items-center justify-center rounded-full bg-gradient-to-br from-purple-600 via-violet-600 to-pink-600 p-1 shadow-[0_0_30px_rgba(147,51,234,0.6)]"
+                    >
+                      <div className="flex h-full w-full items-center justify-center rounded-full bg-black/80 text-center">
+                        <h2 className="text-4xl font-bold uppercase tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-400">
+                          {emotionResult}
+                        </h2>
+                      </div>
+                    </motion.div>
+                    <div className="space-y-4 text-center">
+                      <motion.p
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.3 }}
+                        className="text-xl font-medium text-purple-300"
+                      >
+                        Detected Emotion
+                      </motion.p>
+                      <motion.div
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.5 }}
+                      >
+                        <Button
+                          onClick={() => setEmotionResult(null)}
+                          className="bg-gradient-to-r from-purple-600 to-violet-600 text-white hover:from-purple-700 hover:to-violet-700"
+                        >
+                          Continue
+                        </Button>
+                      </motion.div>
+                    </div>
+                  </div>
+                )
+              )}
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   )
 }
-

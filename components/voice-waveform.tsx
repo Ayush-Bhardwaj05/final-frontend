@@ -21,7 +21,7 @@ export default function VoiceWaveform({ isActive }: VoiceWaveformProps) {
     canvas.height = canvas.offsetHeight
 
     let animationFrameId: number
-    let hue = 270 // Starting hue - purple
+    let hue = 210 // Starting hue - blue
 
     const lines: {
       y: number
@@ -49,7 +49,7 @@ export default function VoiceWaveform({ isActive }: VoiceWaveformProps) {
         ctx.beginPath()
 
         const lineWidth = isActive ? 3 : 2
-        const alpha = isActive ? 0.6 : 0.3
+        const alpha = isActive ? 0.5 : 0.3
         const amplitudeModifier = isActive ? 1.5 : 1
 
         // Create gradient
