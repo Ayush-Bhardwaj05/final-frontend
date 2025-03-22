@@ -30,7 +30,7 @@ export default function AuthPage() {
     const endpoint = type === "login" ? "/auth/login" : "/auth/signup"
 
     try {
-      const response = await fetch(`http://127.0.0.1:8000${endpoint}`, {
+      const response = await fetch(`http://ec2-51-20-54-25.eu-north-1.compute.amazonaws.com:8000${endpoint}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),

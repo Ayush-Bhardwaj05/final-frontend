@@ -1,9 +1,0 @@
-{
-    "rewrites": [
-      {
-        "source": "/api/:path*",
-        "destination": "http://ec2-51-20-54-25.eu-north-1.compute.amazonaws.com:8000/:path*"
-      }
-    ]
-  }
-  

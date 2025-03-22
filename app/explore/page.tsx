@@ -29,7 +29,7 @@ export default function AudioRecorder() {
       formData.append("file", audioBlob, "recording.wav");
       formData.append("responses", JSON.stringify(responses));
 
-      const response = await fetch("http://ec2-51-20-54-25.eu-north-1.compute.amazonaws.com:8000/process-audio", {
+      const response = await fetch("http://ec2-51-20-54-25.eu-north-1.compute.amazonaws.com:8000/convo/process-audio", {
         method: "POST",
         body: formData,
       });
@@ -138,7 +138,7 @@ export default function AudioRecorder() {
                 </div>
                 <p className="text-xs">Awaiting voice input...</p>
                 <div className="mt-2 text-xs text-purple-600 max-w-xs text-center">
-                  VibeSense analyzes vocal patterns to detect emotional states with 94.7% accuracy
+                  ECHO analyzes vocal patterns to detect emotional states with 94.7% accuracy
                 </div>
               </div>
             )}
@@ -263,7 +263,7 @@ export default function AudioRecorder() {
           <h3 className="text-purple-400 font-mono tracking-wider mb-2">ECHO: EMOTIONAL COGNITIVE HUMAN OBSERVER</h3>
           <p className="text-xs leading-relaxed">
             Advanced AI system designed to detect and analyze human emotions through voice patterns. 
-            VibeSense processes vocal tone, pitch, rhythm, and micro-variations to identify emotional states 
+            ECHO processes vocal tone, pitch, rhythm, and micro-variations to identify emotional states 
             with 94.7% accuracy. The system can recognize 8 primary emotions and 24 secondary emotional states.
           </p>
         </div>
