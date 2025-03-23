@@ -12,7 +12,6 @@ const navItems = [
   { name: "Explore", path: "/explore" },
   { name: "Our Models", path: "/models" },
   { name: "About Us", path: "/about" },
-  
 ]
 
 export default function Navbar() {
@@ -24,7 +23,7 @@ export default function Navbar() {
   }
 
   return (
-    <header className="fixed top-0 z-50 w-full backdrop-blur-md">
+    <header className="fixed top-0 z-50 w-full backdrop-blur-md bg-black/40">
       <div className="container mx-auto flex h-20 items-center justify-between px-4">
         <Link href="/" className="flex items-center space-x-2">
           <motion.div
@@ -33,7 +32,7 @@ export default function Navbar() {
             transition={{ duration: 0.5 }}
           >
             <span className="text-2xl font-bold text-white">
-              Vibe<span className="text-[#66BFFF]">Sense</span>
+              Vibe<span className="text-purple-400">Sense</span>
             </span>
           </motion.div>
         </Link>
@@ -45,8 +44,8 @@ export default function Navbar() {
               <li key={item.name}>
                 <Link
                   href={item.path}
-                  className={`text-base font-medium transition-colors hover:text-[#66BFFF] ${
-                    pathname === item.path ? "text-[#66BFFF]" : "text-[#D1D1D1]"
+                  className={`text-base font-medium transition-colors hover:text-purple-400 ${
+                    pathname === item.path ? "text-purple-400" : "text-[#D1D1D1]"
                   }`}
                 >
                   {item.name}
@@ -54,7 +53,10 @@ export default function Navbar() {
               </li>
             ))}
           </ul>
-          <Button asChild className="bg-[#66BFFF] text-[#0A1F44] hover:bg-[#66BFFF]/80">
+          <Button
+            asChild
+            className="bg-gradient-to-r from-purple-600 to-violet-600 text-white hover:from-purple-700 hover:to-violet-700"
+          >
             <Link href="/auth">Login / Sign Up</Link>
           </Button>
         </nav>
@@ -63,7 +65,7 @@ export default function Navbar() {
         <Button
           variant="ghost"
           size="icon"
-          className="text-[#D1D1D1] hover:bg-[#0A1F44]/50 hover:text-[#66BFFF] md:hidden"
+          className="text-[#D1D1D1] hover:bg-purple-900/50 hover:text-purple-400 md:hidden"
           onClick={toggleMenu}
           aria-label="Toggle Menu"
         >
@@ -82,14 +84,14 @@ export default function Navbar() {
         className="overflow-hidden md:hidden"
       >
         {isOpen && (
-          <div className="container mx-auto bg-[#0A1F44]/90 px-4 py-6 backdrop-blur-md">
+          <div className="container mx-auto bg-black/90 px-4 py-6 backdrop-blur-md">
             <ul className="flex flex-col space-y-6">
               {navItems.map((item) => (
                 <li key={item.name}>
                   <Link
                     href={item.path}
-                    className={`block text-lg font-medium transition-colors hover:text-[#66BFFF] ${
-                      pathname === item.path ? "text-[#66BFFF]" : "text-[#D1D1D1]"
+                    className={`block text-lg font-medium transition-colors hover:text-purple-400 ${
+                      pathname === item.path ? "text-purple-400" : "text-[#D1D1D1]"
                     }`}
                     onClick={() => setIsOpen(false)}
                   >
@@ -98,7 +100,10 @@ export default function Navbar() {
                 </li>
               ))}
               <li>
-                <Button asChild className="w-full bg-[#66BFFF] text-[#0A1F44] hover:bg-[#66BFFF]/80">
+                <Button
+                  asChild
+                  className="w-full bg-gradient-to-r from-purple-600 to-violet-600 text-white hover:from-purple-700 hover:to-violet-700"
+                >
                   <Link href="/auth" onClick={() => setIsOpen(false)}>
                     Login / Sign Up
                   </Link>
