@@ -1,8 +1,8 @@
-"use client";
-import { useState, useRef, useEffect } from "react";
-import { motion } from "framer-motion";
+'use client'
+import { motion } from 'framer-motion';
+import { useEffect, useRef, useState } from 'react'
 
-export default function AudioRecorder() {
+export default function Home() {
   const [isRecording, setIsRecording] = useState(false);
   const [responses, setResponses] = useState<string[]>([]);
   const mediaRecorder = useRef<MediaRecorder | null>(null);
@@ -29,7 +29,7 @@ export default function AudioRecorder() {
       formData.append("file", audioBlob, "recording.wav");
       formData.append("responses", JSON.stringify(responses));
 
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/convo/process-audio`, {
+      const response = await fetch("http://127.0.0.1:8000/convo/process-audio", {
         method: "POST",
         body: formData,
       });
@@ -50,6 +50,47 @@ export default function AudioRecorder() {
       setIsRecording(false);
     }
   };
+
+  const videoRef = useRef<HTMLVideoElement>(null)
+  const [emotion, setEmotion] = useState('')
+
+  useEffect(() => {
+    navigator.mediaDevices.getUserMedia({ video: true }).then((stream) => {
+      if (videoRef.current) videoRef.current.srcObject = stream
+    })
+
+    const interval = setInterval(captureAndSend, 3000)
+    return () => clearInterval(interval)
+  }, [])
+
+  const captureAndSend = async () => {
+    const video = videoRef.current
+    if (!video) return
+
+    const canvas = document.createElement('canvas')
+    canvas.width = video.videoWidth
+    canvas.height = video.videoHeight
+    const ctx = canvas.getContext('2d')
+    if (!ctx) return
+    ctx.drawImage(video, 0, 0, canvas.width, canvas.height)
+
+    canvas.toBlob(async (blob) => {
+      if (!blob) return
+      const formData = new FormData()
+      formData.append('file', blob, 'frame.jpg')
+
+      try {
+        const res = await fetch('http://127.0.0.1:8000/video/predict', {
+          method: 'POST',
+          body: formData,
+        })
+        const data = await res.json()
+        if (data.emotion) setEmotion(data.emotion)
+      } catch (err) {
+        console.error('Error sending frame:', err)
+      }
+    }, 'image/jpeg')
+  }
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-black p-4 relative overflow-hidden">
@@ -257,6 +298,14 @@ export default function AudioRecorder() {
             </div>
           )}
         </motion.button>
+  
+        <div className="rounded-xl w-full h-80 p-5 flex flex-col items-center justify-between overflow-y-auto font-mono text-sm">
+          <video ref={videoRef} autoPlay className="w-72 h-auto rounded-xl shadow-lg" />
+          <div className="text-purple-400 text-2xl font-semibold bg-gray-800 px-6 py-2 rounded-xl mt-4">
+            {emotion || 'Detecting...'}
+          </div>
+        </div>
+
         
         {/* Model description */}
         <div className="mt-8 max-w-md text-center text-gray-400 text-sm">
@@ -288,5 +337,6 @@ export default function AudioRecorder() {
         }
       `}</style>
     </div>
-  );
+    
+  )
 }

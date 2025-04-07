@@ -2,20 +2,31 @@
 
 import { useState } from "react"
 import { motion } from "framer-motion"
-import { Menu, X } from "lucide-react"
+import { ChevronDown, Menu, X } from "lucide-react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { Button } from "@/components/ui/button"
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 
-const navItems = [
+// Main navigation items
+const mainNavItems = [
   { name: "Home", path: "/" },
   { name: "Explore", path: "/explore" },
   { name: "Our Models", path: "/models" },
+]
+
+// Dropdown menu items
+const dropdownItems = [
   { name: "About Us", path: "/about" },
+  { name: "Meditate", path: "/meditation" },
+  { name: "Connect", path: "/connect" },
+  { name: "RAG", path: "/rag" },
+  { name: "Report", path: "/report" },
 ]
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false)
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false)
   const pathname = usePathname()
 
   const toggleMenu = () => {
@@ -40,7 +51,7 @@ export default function Navbar() {
         {/* Desktop Navigation */}
         <nav className="hidden md:flex md:items-center md:space-x-8">
           <ul className="flex space-x-8">
-            {navItems.map((item) => (
+            {mainNavItems.map((item) => (
               <li key={item.name}>
                 <Link
                   href={item.path}
@@ -52,6 +63,36 @@ export default function Navbar() {
                 </Link>
               </li>
             ))}
+
+            {/* Desktop Dropdown */}
+            <li>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <button
+                    className={`flex items-center space-x-1 text-base font-medium transition-colors hover:text-purple-400 ${
+                      dropdownItems.some((item) => pathname === item.path) ? "text-purple-400" : "text-[#D1D1D1]"
+                    }`}
+                  >
+                    <span>More</span>
+                    <ChevronDown className="h-4 w-4" />
+                  </button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="bg-black/90 backdrop-blur-md border-purple-900">
+                  {dropdownItems.map((item) => (
+                    <DropdownMenuItem key={item.name} asChild>
+                      <Link
+                        href={item.path}
+                        className={`w-full px-2 py-1.5 text-base font-medium transition-colors hover:text-purple-400 hover:bg-purple-900/30 ${
+                          pathname === item.path ? "text-purple-400" : "text-[#D1D1D1]"
+                        }`}
+                      >
+                        {item.name}
+                      </Link>
+                    </DropdownMenuItem>
+                  ))}
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </li>
           </ul>
           <Button
             asChild
@@ -86,7 +127,7 @@ export default function Navbar() {
         {isOpen && (
           <div className="container mx-auto bg-black/90 px-4 py-6 backdrop-blur-md">
             <ul className="flex flex-col space-y-6">
-              {navItems.map((item) => (
+              {mainNavItems.map((item) => (
                 <li key={item.name}>
                   <Link
                     href={item.path}
@@ -99,6 +140,46 @@ export default function Navbar() {
                   </Link>
                 </li>
               ))}
+
+              {/* Mobile Dropdown/Accordion */}
+              <li>
+                <div className="space-y-4">
+                  <button
+                    onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                    className={`flex w-full items-center justify-between text-lg font-medium transition-colors hover:text-purple-400 ${
+                      dropdownItems.some((item) => pathname === item.path) ? "text-purple-400" : "text-[#D1D1D1]"
+                    }`}
+                  >
+                    <span>More</span>
+                    <ChevronDown className={`h-5 w-5 transition-transform ${isDropdownOpen ? "rotate-180" : ""}`} />
+                  </button>
+
+                  {isDropdownOpen && (
+                    <motion.ul
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: "auto" }}
+                      exit={{ opacity: 0, height: 0 }}
+                      transition={{ duration: 0.2 }}
+                      className="ml-4 space-y-4 border-l-2 border-purple-800 pl-4"
+                    >
+                      {dropdownItems.map((item) => (
+                        <li key={item.name}>
+                          <Link
+                            href={item.path}
+                            className={`block text-lg font-medium transition-colors hover:text-purple-400 ${
+                              pathname === item.path ? "text-purple-400" : "text-[#D1D1D1]"
+                            }`}
+                            onClick={() => setIsOpen(false)}
+                          >
+                            {item.name}
+                          </Link>
+                        </li>
+                      ))}
+                    </motion.ul>
+                  )}
+                </div>
+              </li>
+
               <li>
                 <Button
                   asChild
