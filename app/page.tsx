@@ -134,7 +134,7 @@ export default function Home() {
                 <h1 className="text-4xl font-bold leading-tight text-purple-500 md:text-6xl lg:text-7xl">
                   Meet
                   <motion.span
-                    className="ml-2 bg-gradient-to-r from-purple-400 to-violet-500 bg-clip-text text-transparent"
+                    className="ml-2 bg-gradient-to-r from-purple-400 to-violet-500 bg-clip-text text-white"
                     animate={{
                       backgroundPosition: ["0% center", "100% center", "0% center"],
                     }}

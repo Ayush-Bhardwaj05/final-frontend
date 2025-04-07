@@ -79,7 +79,7 @@ export default function AboutPage() {
           <div className="relative inline-block">
             <h1 className="mb-6 text-5xl font-bold text-white md:text-6xl">
               About{" "}
-              <span className="bg-gradient-to-r from-purple-400 to-violet-500 bg-clip-text text-transparent">
+              <span className="bg-gradient-to-r from-purple-400 to-violet-500 bg-clip-text text-violet-500 text-violet-400">
                 Us
               </span>
             </h1>
@@ -186,34 +186,6 @@ export default function AboutPage() {
             ))}
           </div>
         </motion.div>
-
-        {/* <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8 }}
-          viewport={{ once: true }}
-          className="mx-auto max-w-4xl rounded-xl border border-purple-500/20 bg-black/40 backdrop-blur-sm p-10 shadow-[0_0_30px_rgba(147,51,234,0.2)]"
-        >
-          <h2 className="mb-8 text-center text-4xl font-bold text-white">
-            Our{" "}
-            <span className="bg-gradient-to-r from-purple-400 to-violet-500 bg-clip-text text-transparent">
-              Mission
-            </span>
-          </h2>
-          <p className="mb-6 text-xl text-slate-300">
-            At VibeSense, we believe in creating AI technology that enhances
-            human potential rather than replacing it. Our AI models are designed
-            to work alongside humans, augmenting their capabilities and
-            improving quality of life across various domains including
-            healthcare, education, industry, and personal assistance.
-          </p>
-          <p className="mb-10 text-xl text-slate-300">
-            We are committed to ethical AI development and ensuring our
-            technology is accessible, safe, and beneficial for all. Our research
-            is conducted with transparency and a focus on addressing real-world
-            challenges.
-          </p>
-        </motion.div> */}
       </div>
     </div>
   );

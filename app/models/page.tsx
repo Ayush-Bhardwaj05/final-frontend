@@ -224,7 +224,7 @@ export default function ModelsPage() {
           <div className="relative inline-block">
             <h2 className="mb-6 text-4xl font-bold text-white">
               Experience Our{" "}
-              <span className="bg-gradient-to-r from-purple-400 to-violet-500 bg-clip-text text-transparent">
+              <span className="bg-gradient-to-r from-purple-400 to-violet-500 bg-clip-text text-violet-500">
                 Emotion-Sensing AI
               </span>
             </h2>
