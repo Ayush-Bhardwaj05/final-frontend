@@ -4,7 +4,7 @@
 
 import { useState } from "react"
 import { motion, AnimatePresence } from "framer-motion"
-import { X, MapPin } from "lucide-react"
+import { X } from "lucide-react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
@@ -22,8 +22,6 @@ interface Therapist {
   recommendation: string
   patientStories: string
   profileLink: string
-  // Optional field for future distance feature
-  distance?: string
   // New field for the profile picture URL
   profilePicture?: string
 }
@@ -43,7 +41,6 @@ const therapists: Therapist[] = [
     patientStories: "3 Patient Stories",
     profileLink:
       "https://www.practo.com/bangalore/therapist/paritosh-deepta-occupational-therapist?practice_id=842751&specialization=Therapist&referrer=doctor_listing&page_uid=bcf816c4-86ce-4962-b87b-62f54f42ca22",
-    // Dummy profile picture link
     profilePicture: "https://imagesx.practo.com/providers/ms-paritosh-deepta-occupational-therapist-bangalore-62553477-7cd0-4dbf-bc04-6b23698dd6ea.jpg?i_type=t_70x70-2x-webp",
   },
   {
@@ -56,8 +53,8 @@ const therapists: Therapist[] = [
     clinic: "Bimba Enterprises Pvt. Ltd.",
     consultationFee: "₹800",
     availability: "N/A",
-    recommendation: "N/A",
-    patientStories: "N/A",
+    recommendation: "90%",
+    patientStories: "4 Patient Stories",
     profileLink:
       "https://www.practo.com/bangalore/therapist/ms-twinkle-mohanty-occupational-therapist?practice_id=1419502&specialization=Therapist&referrer=doctor_listing&page_uid=bcf816c4-86ce-4962-b87b-62f54f42ca22",
     profilePicture: "https://imagesx.practo.com/providers/ms-twinkle-mohanty-occupational-therapist-bangalore-f7a05761-67ed-4274-a1cd-c9cb9b12acd1.jpg?i_type=t_70x70-2x-webp",
@@ -72,8 +69,8 @@ const therapists: Therapist[] = [
     clinic: "Helen Speech and Hearing Centre",
     consultationFee: "₹800",
     availability: "N/A",
-    recommendation: "N/A",
-    patientStories: "N/A",
+    recommendation: "82%",
+    patientStories: "2 Patient Stories",
     profileLink:
       "https://www.practo.com/bangalore/therapist/keerthi-8-occupational-therapist?practice_id=1224028&specialization=Therapist&referrer=doctor_listing&page_uid=bcf816c4-86ce-4962-b87b-62f54f42ca22",
     profilePicture: "https://imagesx.practo.com/providers/ms-keerthi-a-occupational-therapist-bangalore-97fa18e8-80b3-47f7-a15a-09cab43d0fe7.jpg?i_type=t_70x70-2x-webp",
@@ -88,8 +85,8 @@ const therapists: Therapist[] = [
     clinic: "Helen Speech and Hearing Centre",
     consultationFee: "₹800",
     availability: "N/A",
-    recommendation: "N/A",
-    patientStories: "N/A",
+    recommendation: "100%",
+    patientStories: "4 Patient Stories",
     profileLink:
       "https://www.practo.com/bangalore/therapist/preetha-g-occupational-therapist?practice_id=1151740&specialization=Therapist&referrer=doctor_listing&page_uid=bcf816c4-86ce-4962-b87b-62f54f42ca22",
     profilePicture: "https://imagesx.practo.com/providers/ms-preetha-g-occupational-therapist-bangalore-473a3ba9-4845-4727-8a67-6d4956c384c8.jpg?i_type=t_70x70-2x-webp",
@@ -194,18 +191,6 @@ const therapists: Therapist[] = [
 
 export default function TherapistsPage() {
   const [selectedTherapist, setSelectedTherapist] = useState<Therapist | null>(null)
-  // This state will later hold the computed distance from the user to the therapist's location
-  const [userDistance, setUserDistance] = useState<Record<number, string>>({})
-
-  // Skeleton function for calculating distance
-  const calculateDistance = (id: number) => {
-    // Placeholder for future backend integration
-    setUserDistance((prev) => ({ ...prev, [id]: "Calculating..." }))
-    // Later, you will replace this with a real calculation
-    setTimeout(() => {
-      setUserDistance((prev) => ({ ...prev, [id]: "5 km" }))
-    }, 1000)
-  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 py-16">
@@ -246,22 +231,14 @@ export default function TherapistsPage() {
                   <div className="mb-4 flex justify-between items-center">
                     <div className="flex-1 pr-4">
                       <h3 className="mb-2 text-2xl font-bold text-white">{therapist.name}</h3>
-                      {/* <p className="mb-1 text-slate-300"><span className="font-semibold">Specialization:</span> {therapist.specialization}</p>
-                      <p className="mb-1 text-slate-300"><span className="font-semibold">Experience:</span> {therapist.experience}</p>
-                      <p className="mb-1 text-slate-300"><span className="font-semibold">Clinic:</span> {therapist.clinic}</p>
-                      <p className="mb-1 text-slate-300"><span className="font-semibold">Consultation Fee:</span> {therapist.consultationFee}</p>
-                      <p className="mb-1 text-slate-300"><span className="font-semibold">Location:</span> {therapist.locality}, {therapist.city}</p>
-                      <p className="mb-1 text-slate-300"><span className="font-semibold">Recommendation:</span> {therapist.recommendation}</p>
-                      <p className="mb-4 text-slate-300"><span className="font-semibold">Patient Stories:</span> {therapist.patientStories}</p> */}
                     </div>
                     <img
                       src={therapist.profilePicture || "https://via.placeholder.com/150"}
-                      alt=""
+                      alt="Profile"
                       className="h-24 w-24 rounded-full object-cover border border-purple-500"
                     />
                   </div>
 
-                  {/* <h3 className="mb-2 text-2xl font-bold text-white">{therapist.name}</h3> */}
                   <p className="mb-1 text-slate-300">
                     <span className="font-semibold">Specialization:</span> {therapist.specialization}
                   </p>
@@ -283,16 +260,6 @@ export default function TherapistsPage() {
                   <p className="mb-4 text-slate-300">
                     <span className="font-semibold">Patient Stories:</span> {therapist.patientStories}
                   </p>
-                  {/* Distance Placeholder */}
-                  <div className="mb-4 flex items-center gap-2 text-slate-300">
-                    <MapPin className="h-5 w-5 text-purple-400" />
-                    <span>
-                      Distance: {userDistance[therapist.id] ? userDistance[therapist.id] : "Not Calculated"}
-                    </span>
-                    <Button size="sm" variant="outline" onClick={() => calculateDistance(therapist.id)}>
-                      Calculate
-                    </Button>
-                  </div>
                   <div className="flex items-center justify-between">
                     <Button variant="link" className="text-purple-400" asChild>
                       <Link href={therapist.profileLink} target="_blank">
@@ -366,16 +333,6 @@ export default function TherapistsPage() {
               <p className="mb-4 text-slate-300">
                 <strong>Patient Stories:</strong> {selectedTherapist.patientStories}
               </p>
-              {/* Distance info in modal */}
-              <div className="mb-4 flex items-center gap-2 text-slate-300">
-                <MapPin className="h-5 w-5 text-purple-400" />
-                <span>
-                  Distance: {userDistance[selectedTherapist.id] ? userDistance[selectedTherapist.id] : "Not Calculated"}
-                </span>
-                <Button size="sm" variant="outline" onClick={() => calculateDistance(selectedTherapist.id)}>
-                  Calculate Distance
-                </Button>
-              </div>
               <div>
                 <Button variant="default" asChild>
                   <Link href={selectedTherapist.profileLink} target="_blank">

@@ -22,6 +22,7 @@ const dropdownItems = [
   { name: "Connect", path: "/connect" },
   { name: "RAG", path: "/rag" },
   { name: "Report", path: "/report" },
+  {name : "Future Self Talk", path: "/future"},
 ]
 
 export default function Navbar() {

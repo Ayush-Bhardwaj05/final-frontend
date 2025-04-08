@@ -72,7 +72,7 @@ export default function RagFrontend() {
     setError(null)
 
     try {
-      const res = await axios.post("http://127.0.0.1:8001/rag", {
+      const res = await axios.post("https://rag-backend-sqqz.onrender.com/rag", {
         query: query,
       })
 

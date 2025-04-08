@@ -14,7 +14,8 @@ export default function Home() {
       chatBoxRef.current.scrollTop = chatBoxRef.current.scrollHeight;
     }
   }, [responses]);
-
+    const endpoint = '/convo/process-audio'
+    const endpoint2 = '/video/predict'
   const startRecording = async () => {
     const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
     const recorder = new MediaRecorder(stream);
@@ -29,7 +30,7 @@ export default function Home() {
       formData.append("file", audioBlob, "recording.wav");
       formData.append("responses", JSON.stringify(responses));
 
-      const response = await fetch("http://127.0.0.1:8000/convo/process-audio", {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}${endpoint}`, {
         method: "POST",
         body: formData,
       });
@@ -80,7 +81,7 @@ export default function Home() {
       formData.append('file', blob, 'frame.jpg')
 
       try {
-        const res = await fetch('http://127.0.0.1:8000/video/predict', {
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}${endpoint2}`, {
           method: 'POST',
           body: formData,
         })
